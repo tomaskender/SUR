@@ -1,7 +1,7 @@
 import os, glob, sys  # for managing directory paths and files
 import numpy as np
 from PIL import Image
-from src import face_detector as face
+import face_detector as face
 import argparse
 
 PARENT_DIR = os.getcwd()

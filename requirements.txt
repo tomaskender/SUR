@@ -7,4 +7,4 @@ Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
 sklearn==0.0
 scikit_image==0.16.2
-
+tensorflow==2.2.0rc3
