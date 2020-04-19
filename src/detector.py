@@ -1,6 +1,7 @@
 import os, glob, sys  # for managing directory paths and files
 import numpy as np
 from PIL import Image
+from scipy.io import wavfile
 import face_detector as face
 import voice_detector as voice
 import argparse
@@ -35,7 +36,7 @@ def get_image_file(file):
 	return [np.array(Image.open(f).convert('RGB')) for f in glob.glob(file)]
 
 def get_audio_file(file):
-    return [read(f) for f in glob.glob(file)]
+    return [wavfile.read(f) for f in glob.glob(file)]
 
 # loads images and concatenates train and test data
 def image_data():
@@ -55,15 +56,15 @@ def image_data():
 
 # loads voices and concatenates train and test data
 def voice_data():
-	test_x = np.array(get_voice_data(DATA_DIR + 'target_dev/*.wav'))
+	test_x = np.array(get_audio_file(DATA_DIR + 'target_dev/*.wav'))
 	test_y = np.array([1] * len(test_x))  # 1 is our wanted voice
-	t = np.array(get_voice_data(DATA_DIR + 'non_target_dev/*.wav'))
+	t = np.array(get_audio_file(DATA_DIR + 'non_target_dev/*.wav'))
 	test_y = np.concatenate((test_y, np.array([0] * len(t))), axis=0)
 	test_x = np.concatenate((test_x, t), axis=0)
 
-	train_x = np.array(get_voice_data(DATA_DIR + 'target_train/*.wav'))
+	train_x = np.array(get_audio_file(DATA_DIR + 'target_train/*.wav'))
 	train_y = np.array([1] * len(train_x))  # 1 is our wanted voice
-	t = np.array(get_voice_data(DATA_DIR + 'non_target_train/*.wav'))
+	t = np.array(get_audio_file(DATA_DIR + 'non_target_train/*.wav'))
 	train_y = np.concatenate((train_y, np.array([0] * len(t))), axis=0)
 	train_x = np.concatenate((train_x, t), axis=0)
 
