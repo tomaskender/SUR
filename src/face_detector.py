@@ -13,9 +13,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import SGDClassifier
 import pickle, re, glob
 
-BATCH_SIZE = 500
-EPOCHS = 10
+BATCH_SIZE = 250
+EPOCHS = 20
 SIZE = 80
+
+
+def resize_img(images):
+	final_image_list = []
+	for image in images:
+		image = resize(image, (SIZE, SIZE, 3))
+		final_image_list.append(np.asarray(image))
+	return final_image_list
+
 
 # not in use
 def extract_face(image_list, required_size=(SIZE, SIZE)):  # size of given examples
@@ -35,46 +44,37 @@ def extract_face(image_list, required_size=(SIZE, SIZE)):  # size of given examp
 	return final_image_list
 
 
-def resize_img(images):
-	final_image_list = []
-	for image in images:
-		image = resize(image, (SIZE, SIZE, 3))
-		final_image_list.append(np.asarray(image))
-	return final_image_list
-
-
-# does not work unfortunately :(
 def build_CNN():
 	modelCNN = Sequential()
 	modelCNN.add(Conv2D(4, (14, 14),
-					 activation='relu',
-					 input_shape=(SIZE, SIZE, 3),
-					 bias_initializer=initializers.constant(0.1),
-					 padding='same'))
+						activation='relu',
+						input_shape=(SIZE, SIZE, 3),
+						bias_initializer=initializers.constant(0.1),
+						padding='same'))
 	modelCNN.add(MaxPooling2D(pool_size=(2, 2)))  # pooling
-	modelCNN.add(Conv2D(8, (8, 8),  # 2nd Convolution layer with 64 channels
-					 activation='relu',
-					 bias_initializer=initializers.constant(0.1)))
+	modelCNN.add(Conv2D(8, (8, 8),  # 2nd Convolution layer with 8 channels
+						activation='relu',
+						bias_initializer=initializers.constant(0.1)))
 	modelCNN.add(MaxPooling2D(pool_size=(2, 2)))
 	# Flattening, turning to 1D
 	modelCNN.add(Dropout(0.25))
 	modelCNN.add(Flatten())
 	modelCNN.add(Dense(256, activation='relu', bias_initializer=initializers.constant(0.1)))
 	modelCNN.add(Dropout(0.3))
-	modelCNN.add(Dense(1, activation='sigmoid'))
+	modelCNN.add(Dense(1, activation='sigmoid'))  # sigmoid is more suitable for binary crossentropy
 	sgd = optimizers.SGD(lr=0.01, momentum=0.9)
 	modelCNN.compile(loss='binary_crossentropy',  # loss function used for classes that are greater than 2)
-				  optimizer=sgd,
-				  metrics=['accuracy'])
+					 optimizer=sgd,
+					 metrics=['accuracy'])
 	return modelCNN
 
 
 def train(train_x, train_y, test_x, test_y, modelCNN, PLOTS):
 	hist = modelCNN.fit(train_x, train_y,
-					 batch_size=BATCH_SIZE,
-					 epochs=EPOCHS,
-					 validation_data=(test_x, test_y),
-					 shuffle=True, verbose=1)
+						batch_size=BATCH_SIZE,
+						epochs=EPOCHS,
+						validation_data=(test_x, test_y),
+						shuffle=True, verbose=1)
 	score = modelCNN.evaluate(test_x, test_y)
 	print('TEST LOSS:', score[0])
 	print('ACCURACY SCORE:', score[1])
@@ -98,7 +98,7 @@ def train(train_x, train_y, test_x, test_y, modelCNN, PLOTS):
 	return modelCNN
 
 
-def build_model(train_x, train_y, test_x, test_y, USE_CNN = False, PLOTS = False):
+def build_model(train_x, train_y, test_x, test_y, USE_CNN=False, PLOTS=False):
 	# shuffles data with 10! permutations
 	train_x, train_y = shuffle(train_x, train_y, random_state=10)
 	test_x, test_y = shuffle(test_x, test_y, random_state=10)
@@ -129,6 +129,7 @@ def build_model(train_x, train_y, test_x, test_y, USE_CNN = False, PLOTS = False
 		modelCNN = build_CNN()
 		train_x, test_x, train_y, test_y = train_test_split(all_x, all_y, test_size=0.2)
 		modelCNN = train(train_x, train_y, test_x, test_y, modelCNN, PLOTS=PLOTS)
+		print("CNN model saved as modelCNN.h5")
 		modelCNN.save('src/modelCNN.h5')
 	else:
 		all_x = all_x.reshape(all_x.shape[0], -1)
@@ -136,27 +137,28 @@ def build_model(train_x, train_y, test_x, test_y, USE_CNN = False, PLOTS = False
 		if PLOTS:
 			from sklearn.model_selection import KFold
 			from sklearn.model_selection import cross_val_score
-			cross_val = cross_val_score(modelSGD, all_x, all_y, cv=KFold(n_splits=4,random_state=5))
+			cross_val = cross_val_score(modelSGD, all_x, all_y, cv=KFold(n_splits=4, random_state=5))
 			print('FOLDS: ', cross_val)
 			print('MEAN: ', cross_val.mean(), 'STD: ', cross_val.std())
 			cross_val *= 100
 			base = min((85, min(cross_val) - 1))
 			fig = pyplot.figure()
 			ax = fig.add_subplot(111)
-			ax.bar(['FOLD ' + str(i + 1) for i in range(len(cross_val))], cross_val - base, bottom=85)
-			ax.axhline(y=cross_val.mean())
 			ax.set_title('VALIDATION SUMMARY')
 			ax.set_ylabel('ACCURACY')
 			ax.set_yticks(np.arange(base, 100, 1))
+			ax.bar(['FOLD ' + str(i + 1) for i in range(len(cross_val))], cross_val - base, bottom=85)
+			ax.axhline(y=cross_val.mean())
 			pyplot.show()
 		train_x, test_x, train_y, test_y = train_test_split(all_x, all_y, test_size=0.1)
 		modelSGD.fit(train_x, train_y)
 		print("ACCURACY SCORE: ", accuracy_score(modelSGD.predict(test_x), test_y))
-		print("SGD modelCNN saved as modelSGD.pkl")
+		print("SGD model saved as modelSGD.pkl")
 		with open('src/modelSGD.pkl', 'wb') as f:
 			pickle.dump(modelSGD, f)
 
-def evaluate(cnn = False, verbose = 0):
+
+def evaluate(cnn=False, verbose=0):
 	if cnn == True:
 		if verbose == 1: print("Using CNN model")
 		cnn = True
@@ -166,14 +168,14 @@ def evaluate(cnn = False, verbose = 0):
 		with open('src/modelSGD.pkl', 'rb') as file:
 			model = pickle.load(file)
 
-	eval_images =  []
+	eval_images = []
 	results = ''
 	for filename in glob.glob('eval/*.png'):
 		eval_images.append(filename)
 	eval_images.sort(key=lambda f: int(re.sub('\D', '', f)))
 	for eval_img in eval_images:
 		img = Image.open(eval_img).convert('RGB')
-		if cnn == True:
+		if cnn:
 			image = np.array(img)
 			image = image.reshape(-1, SIZE, SIZE, 3)
 			prob = model.predict_proba(image)
@@ -184,39 +186,12 @@ def evaluate(cnn = False, verbose = 0):
 			prob = model.predict_proba([image])
 			hard_decision = int(prob[0][0] <= prob[0][1])
 			prob = prob[0][1]
-		result = "{} {} {}\n".format(eval_img[5:-4], prob , hard_decision)
+		result = "{} {} {}\n".format(eval_img[5:-4], prob, hard_decision)
 		if verbose == 1: print(result, end='')
 		results += result
 
-	if cnn == True: eval_file = "images_CNN.txt"
+	if cnn: eval_file = "images_CNN.txt"
 	else: eval_file = "images_SGD.txt"
 	f = open(eval_file, 'w')
 	f.write(results)  # python will convert \n to os.linesep
 	f.close()
-
-# 	img = Image.open("data/non_target_train/m416_02_r08_i0_0.png").convert('RGB')
-# 	image = np.array(img).flatten()
-# 	prob = modelSGD.predict_proba([image])
-# 	print(prob)
-# 	# print(modelSGD.predict([image]))
-# 	if cnn:
-# 		imCNN = np.array(img)
-# 		imCNN = imCNN.reshape(-1, SIZE, SIZE, 3)
-# 		prob = modelCNN.predict_proba(imCNN)
-# 		print(prob)
-# 		print(modelCNN.predict(imCNN))
-# 		print(modelCNN.predict_classes(imCNN))
-#
-# 	img2 = Image.open("data/target_train/m429_01_p02_i0_0.png").convert('RGB')
-# 	image2 = np.array(img2).flatten()
-# 	proba2 = modelSGD.predict_proba([image2])
-# 	print(proba2)
-# 	# print(modelSGD.predict([image2]))
-# 	if cnn:
-# 		imCNN2 = np.array(img2)
-# 		imCNN2 = imCNN2.reshape(-1, SIZE, SIZE, 3)
-# 		proba2 = modelCNN.predict_proba(imCNN2)
-# 		print("DRUHY:", proba2)
-# 		print(modelCNN.predict(imCNN2))
-# 		print(modelCNN.predict_classes(imCNN2))
-# # return modelCNN
