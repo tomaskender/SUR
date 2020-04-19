@@ -1,0 +1,94 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[slovak]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[left=2cm, top=3cm, text={17cm, 24cm}]{geometry}
+\usepackage[unicode, colorlinks, hypertexnames=false, citecolor=red]{hyperref}
+\usepackage{tabto}
+
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\Huge
+			\textsc{Vysoké učení technické v~Brně} \\
+			\huge
+			\textsc{Fakulta informačních technologií} \\
+			\vspace{\stretch{0.382}}
+			\LARGE
+			Projektová dokumentácia k~predmetu SUR \\
+			\Huge
+			Detektor osoby
+			\vspace{\stretch{0.618}}
+		\end{center}
+
+		{\Large
+			\today
+			\hfill
+			\begin{tabular}{r}
+			Dominik Boboš (xbobos00) \\
+			Tomáš Kender (xkende01)
+			\end{tabular}
+		}
+	\end{titlepage}
+	
+	\section{Úvod}
+	Zadaním projektu je natrénovať detektor jednej osoby z~obrázku tváre či hlasovej nahrávky. Detektor je implementovaný v~programovacom jazyku \texttt{Python\,3.8}. 
+	
+	\section{Spustenie a používanie detektoru}
+		\subsection{Inštalácia knižníc}
+	Na spustenie všetkých súčastí programu je potrebné mať nainštalované všetky potrebné knižnice a súčasti, ktoré sú obsiahnuté v~súbore \texttt{requirements.txt}. 
+	
+	Ich inštalaciu je možné uskutočniť pomocou \texttt{pip}:
+			\begin{verbatim}
+    $ pip install -r requirements.txt
+			\end{verbatim}
+			
+	Prípadne:
+			\begin{verbatim}
+    $ pip3 install -r requirements.txt
+			\end{verbatim}
+			
+		\subsection{Dátová štruktúra}
+	Program očakáva nasledujúcu dátovú štruktúru.
+			\begin{verbatim}
+-- |-- data              // dáta určené k~trénovaniu a testovaniu detektoru
+       |-- target_dev
+       |-- non_target_dev
+       |-- target_train
+       |-- non_target_train
+   |-- eval              // dáta určené ku klasifikácií
+   |-- src               // zdrojové kódy 
+-requirements.txt
+			\end{verbatim}
+			
+		\subsection{Spustenie jednotlivých súčastí detektoru}
+	Spustenie detektoru je možné pomocou príkazu.
+			\begin{verbatim}
+    $ python src/detector.py
+			\end{verbatim}
+	Prípadne:
+			\begin{verbatim}
+    $ python3 src/detector.py
+			\end{verbatim}
+	Po spustení sa natrénujú modely trénovacími dátami, modely sa uložia do priečinku \texttt{src} a následne sa uskutoční klasifikácia dát v~\texttt{eval} a uložia sa výsledky do .txt súboru.
+	Funkcie detektoru je možné upravovať pomocou prepínačou na príkazovom riadku.
+			\begin{verbatim}
+--verbose   // informácie pre ladenie
+--plot      // vykreslí informácie získané počas trénovania 
+--evalonly  // vyhodnotia sa len dáta v~/eval (potrebné mať uložené modely)
+--trainonly // trénovanie modelu bez vyhodnotenia
+--cnn       // použitie CNN modelu pre spracovanie obrázkov
+			\end{verbatim}
+	\section{Použité modely}
+		\subsection{Modely pre spracovanie obrázkov}
+		Pred samotným trénovaním modelov je dôležité získať čo najviac trénovacích a testovacích dát. Toto je docielené tým, že na trénovanie sa používajú všetky \emph{.png} súbory v~priečinku \texttt{data}. Obrázky sa načítajú pomocou knižnice \emph{Pillow}. Target dátam sa nastaví label 1, ostatným label 0. Pomocou \emph{ImageDataGenerator} z~knižnice \emph{Keras} sa vytvoria ďalšie trénovacie dáta a to vďaka modifikácií ako posun, rotacia, skrivenie, prevrátenie. Takto získané dáta smerujú modelom na trénovanie. 
+\subsubsection{Model CNN}
+\textbf{CNN} je model konvolučných neuronových sietí, bol vybraný na základe zvedavosti, či CNN dokáže na akceptovateľnej úrovni rozpoznať tváre. Tento model získava features obrázkov z~rôznych vrstiev, známe aj ako \emph{feature maps}, pomocou \emph{pooling-u} postupne matice \uv{zmenšujeme}, respektíve podvzorkujeme. Nakoniec použijeme funkciu \emph{flatten} čím vytvoríme 1D pole. Ako optimalizátor je použitý \textbf{SGD} - \emph{Stochastic-Gradient Descent}, a aby sme zabránili pretrénovaniu, dáta sa predkladajú v~náhodnom poradí a zo všetkých dát sa náhodne vybere 20\%, ktoré sa budú používať ako testovacie dáta. Trénovanie modelu potom prebieha v~desiatkách \emph{Epochs} a samotné trénovanie trvá pomerne dlho. Model sa po trénovaní uloží \texttt{src/modelCNN.h5}.
+\subsubsection{Lineárny model SVM s~SGD}
+Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a pritom so stále akceptovateľnou úspešnosťou.
+		
+
+
+\end{document}
