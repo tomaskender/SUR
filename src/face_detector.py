@@ -81,19 +81,19 @@ def train(train_x, train_y, test_x, test_y, modelCNN, PLOTS):
 
 	if PLOTS:
 		pyplot.plot(hist.history['accuracy'])
-		pyplot.plot(hist.history['val_accuracy'])
+		pyplot.plot(hist.history['test_accuracy'])
 		pyplot.title('modelCNN accuracy')
 		pyplot.ylabel('Accuracy')
 		pyplot.xlabel('Epoch')
-		pyplot.legend(['Train', 'Val'], loc='upper left')
+		pyplot.legend(['Train', 'Test'], loc='upper left')
 		pyplot.show()
 
 		pyplot.plot(hist.history['loss'])
-		pyplot.plot(hist.history['val_loss'])
+		pyplot.plot(hist.history['test_loss'])
 		pyplot.title('modelCNN loss')
 		pyplot.ylabel('Loss')
 		pyplot.xlabel('Epoch')
-		pyplot.legend(['Train', 'Val'], loc='upper right')
+		pyplot.legend(['Train', 'Test'], loc='upper right')
 		pyplot.show()
 	return modelCNN
 
@@ -150,7 +150,7 @@ def build_model(train_x, train_y, test_x, test_y, USE_CNN=False, PLOTS=False):
 			ax.bar(['FOLD ' + str(i + 1) for i in range(len(cross_val))], cross_val - base, bottom=85)
 			ax.axhline(y=cross_val.mean())
 			pyplot.show()
-		train_x, test_x, train_y, test_y = train_test_split(all_x, all_y, test_size=0.1)
+		train_x, test_x, train_y, test_y = train_test_split(all_x, all_y, test_size=0.2)
 		modelSGD.fit(train_x, train_y)
 		print("ACCURACY SCORE: ", accuracy_score(modelSGD.predict(test_x), test_y))
 		print("SGD model saved as modelSGD.pkl")
@@ -178,15 +178,22 @@ def evaluate(cnn=False, verbose=0):
 		if cnn:
 			image = np.array(img)
 			image = image.reshape(-1, SIZE, SIZE, 3)
+			score1 = model.evaluate(image, [1], verbose=0)
+			score0 = model.evaluate(image, [0], verbose=0)
 			prob = model.predict_proba(image)
 			hard_decision = int(0.5 <= prob[0][0])
-			prob = prob[0][0]
+			if hard_decision == 1:
+				prob = 1 - 1/abs(score0[0])*100
+			else:
+				prob = 1/abs(score1[0])*100
+				if prob >= 0.5:
+					prob = 1 - 1/prob
 		else:
 			image = np.array(img).flatten()
 			prob = model.predict_proba([image])
 			hard_decision = int(prob[0][0] <= prob[0][1])
 			prob = prob[0][1]
-		result = "{} {} {}\n".format(eval_img[5:-4], prob, hard_decision)
+		result = "{} {:0.3f} {}\n".format(eval_img[5:-4], prob, hard_decision)
 		if verbose == 1: print(result, end='')
 		results += result
 

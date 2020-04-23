@@ -87,7 +87,10 @@
 \subsubsection{Model CNN}
 \textbf{CNN} je model konvolučných neuronových sietí, bol vybraný na základe zvedavosti, či CNN dokáže na akceptovateľnej úrovni rozpoznať tváre. Tento model získava features obrázkov z~rôznych vrstiev, známe aj ako \emph{feature maps}, pomocou \emph{pooling-u} postupne matice \uv{zmenšujeme}, respektíve podvzorkujeme. Nakoniec použijeme funkciu \emph{flatten} čím vytvoríme 1D pole. Ako optimalizátor je použitý \textbf{SGD} - \emph{Stochastic-Gradient Descent}, a aby sme zabránili pretrénovaniu, dáta sa predkladajú v~náhodnom poradí a zo všetkých dát sa náhodne vybere 20\%, ktoré sa budú používať ako testovacie dáta. Trénovanie modelu potom prebieha v~desiatkách \emph{Epochs} a samotné trénovanie trvá pomerne dlho. Model sa po trénovaní uloží \texttt{src/modelCNN.h5}.
 \subsubsection{Lineárny model SVM s~SGD}
-Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a pritom so stále akceptovateľnou úspešnosťou.
+Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a celková rýchlosť v porovnaní s ostatnými klasifikátormi a pritom so stále použiteľnou úspešnosťou.
+
+\section{Záver}
+	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a    prijateľnú presnosť sme sa rozhodli ho ponechať v projekte. Z hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
 		
 
 
