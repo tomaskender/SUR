@@ -1,10 +1,11 @@
 import os, glob, sys  # for managing directory paths and files
 import numpy as np
 from PIL import Image
-from scipy.io import wavfile
 import face_detector as face
 import voice_detector as voice
 import argparse
+from datetime import datetime
+from scipy.io import wavfile
 
 PARENT_DIR = os.getcwd()
 DATA_DIR = PARENT_DIR + "/data/"
@@ -79,9 +80,18 @@ if arguments.system == 'face':
 elif arguments.system == 'voice':
 	if not arguments.evalonly:
 		train_x, train_y, test_x, test_y = voice_data()
-		voice.build_model(train_x, train_y, test_x, test_y)
+		
+		if VERBOSE:
+			print('Building model started at ' + str(datetime.now().time()))
+		voice.build_model(train_x, train_y, test_x, test_y, verbose=VERBOSE)
+		if VERBOSE:
+			print('Building model ended at ' + str(datetime.now().time()))
 	if not arguments.trainonly:
+		if VERBOSE:
+			print('Evaluation started at ' + str(datetime.now().time()))
 		voice.evaluate(verbose=VERBOSE)
+		if VERBOSE:
+			print('Evaluation ended at ' + str(datetime.now().time()))
 else:
 	sys.stderr.write("ERROR: Invalid system argument!\n")
 	sys.exit(0)
