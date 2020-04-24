@@ -183,9 +183,14 @@ def evaluate(cnn=False, verbose=0):
 			prob = model.predict_proba(image)
 			hard_decision = int(0.5 <= prob[0][0])
 			if hard_decision == 1:
-				prob = 1 - 1/abs(score0[0])*100
+				prob = abs(1 - 1/abs(score0[0])*100)
+				if prob < 0.5:
+					hard_decision = 0
+				if prob > 1:
+					while prob > 1:
+						prob /=10
 			else:
-				prob = 1/abs(score1[0])*100
+				prob = abs(1/abs(score1[0])*100)
 				if prob >= 0.5:
 					prob = 1 - 1/prob
 		else:
