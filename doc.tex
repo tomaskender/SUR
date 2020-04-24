@@ -49,7 +49,7 @@
 			\begin{verbatim}
     $ pip3 install -r requirements.txt
 			\end{verbatim}
-			
+			\emph{Poznámka: Program sa dá spustiť aj priamo cez priložený dockerfile, ktorý nainštaluje balíky do virtuálneho prostredia a tým nerozhodí našu existujúcu konfiguráciu na počítači.}
 		\subsection{Dátová štruktúra}
 	Program očakáva nasledujúcu dátovú štruktúru.
 			\begin{verbatim}
@@ -80,6 +80,7 @@
 --evalonly  // vyhodnotia sa len dáta v~/eval (potrebné mať uložené modely)
 --trainonly // trénovanie modelu bez vyhodnotenia
 --cnn       // použitie CNN modelu pre spracovanie obrázkov
+--system    // výber systému, ktorý sa má spustiť (face alebo voice)
 			\end{verbatim}
 	\section{Použité modely}
 		\subsection{Modely pre spracovanie obrázkov}
@@ -88,7 +89,10 @@
 \textbf{CNN} je model konvolučných neuronových sietí, bol vybraný na základe zvedavosti, či CNN dokáže na akceptovateľnej úrovni rozpoznať tváre. Tento model získava features obrázkov z~rôznych vrstiev, známe aj ako \emph{feature maps}, pomocou \emph{pooling-u} postupne matice \uv{zmenšujeme}, respektíve podvzorkujeme. Nakoniec použijeme funkciu \emph{flatten} čím vytvoríme 1D pole. Ako optimalizátor je použitý \textbf{SGD} - \emph{Stochastic-Gradient Descent}, a aby sme zabránili pretrénovaniu, dáta sa predkladajú v~náhodnom poradí a zo všetkých dát sa náhodne vybere 20\%, ktoré sa budú používať ako testovacie dáta. Trénovanie modelu potom prebieha v~desiatkách \emph{Epochs} a samotné trénovanie trvá pomerne dlho. Model sa po trénovaní uloží \texttt{src/modelCNN.h5}.
 \subsubsection{Lineárny model SVM s~SGD}
 Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a pritom so stále akceptovateľnou úspešnosťou.
-		
+	\section{Spracovanie zvuku}
+			\subsection{Random Forest s MFCC}
+			Pre extrahovanie features bol zvolený \textbf{MFCC} z knižnice \emph{python\_speech\_features}. Ten bol pre vyššiu presnosť kombinovaný s deltou vzoriek a deltou delty (tzv. double delta).
+			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k zlému výsledku, prevažná väčšina dojde k správnemu a túto chybu kvantitatívne vyváži. Z toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
 
 
 \end{document}
