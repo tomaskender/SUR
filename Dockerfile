@@ -17,6 +17,7 @@ WORKDIR /app
 ADD . /app
 ADD ./src /app/src
 ADD ./data /app/data
+ADD ./data/eval /app/data/eval
 ADD ./data/target_dev /app/data/target_dev
 ADD ./data/target_train /app/data/target_train
 ADD ./data/non_target_dev /app/data/non_target_dev

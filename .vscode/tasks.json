@@ -17,7 +17,8 @@
                 "docker-build"
             ],
             "python": {
-                "file": "src/detector.py"
+                "file": "src/detector.py",
+                "args": ["--system=voice --verbose"]
             }
         }
     ]
