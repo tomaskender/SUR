@@ -67,11 +67,11 @@
 		\subsection{Spustenie jednotlivých súčastí detektoru}
 	Spustenie detektoru je možné pomocou príkazu.
 			\begin{verbatim}
-    $ python src/detector.py
+    $ python src/detector.py --system=face/voice
 			\end{verbatim}
 	Prípadne:
 			\begin{verbatim}
-    $ python3 src/detector.py
+    $ python3 src/detector.py --system=face/voice
 			\end{verbatim}
 	Po spustení sa natrénujú modely trénovacími dátami, modely sa uložia do priečinku \texttt{src} a následne sa uskutoční klasifikácia dát v~\texttt{eval} a uložia sa výsledky do .txt súboru.
 	Funkcie detektoru je možné upravovať pomocou prepínačou na príkazovom riadku.
@@ -93,11 +93,16 @@ Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph
 	\section{Spracovanie zvuku}
 			\subsection{Random Forest s MFCC}
 			Z nahrávky sa najprv odstráni šum, následne sa oddelí ticho. Pre extrahovanie features bola zvolená knižnica \emph{librosa}. Z nej boli využité MFCC a piptrack (čiže pitch hlasu) pre charakterizáciu nahrávky. MFCC featúry sa následne ešte ďalej škálovali a prehnali funkciou zscore z knižnice \emph{scipy}.
-			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k zlému výsledku, prevažná väčšina dojde k správnemu a túto chybu kvantitatívne vyváži. Z toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
+			
+			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k zlému výsledku, prevažná väčšina dojde k správnemu a túto chybu kvantitatívne vyváži.
+			
+			Z toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
 			Ladením a testovaním som nakoniec skončil pri lese s veľkosťou 96 stromov a zhodnou hĺbkou.
 
 \section{Záver}
 	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a    prijateľnú presnosť sme sa rozhodli ho ponechať v projekte. Z hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
+
+	Pre detekciu hlasovej nahrávky by mohlo byť zaujímavé porovnanie s GMM modelom, ktoré sa javilo byť rýchlejšie na natrénovanie, avšak to sa mi nepodarilo spojazdniť a musel som ostať pri Random Foreste. Systém vracia pre zhodu skóre 0.14-17 a pre nezhodu zhruba 0.08-0.12 až 0.13. Toto by šlo určite vylepšiť chytrejším výpočtom celkového skóre z výstupu predikcie modelu, ale pre naše potreby vracalo postačujúce výsledky aj existujúce riešenie, ktoré priemeruje čiastkové skóre.
 
 
 \end{document}
