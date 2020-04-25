@@ -1,25 +1,31 @@
 import numpy as np
 from scipy import stats
-from scipy.io import wavfile
+#from scipy.io import wavfile
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
-from python_speech_features import mfcc, delta
+#from python_speech_features import mfcc, delta
 import pickle, re, glob
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from scipy.io import wavfile
+from librosa.feature import mfcc, delta
+from librosa.effects import trim
+from librosa.core import load as load_audio
 
-def extract_features(rate, audio):
-    #assert(rate == 16000)
-    mfcc_feature = mfcc(audio,rate, winlen=0.025, winstep=0.01, numcep=20,nfft = 1200, appendEnergy = True)    
-    mfcc_feature = preprocessing.scale(mfcc_feature)
+def extract_features(audio, rate):
+    #audio = trim(audio)
+
+    mfcc_feature = mfcc(y=audio,sr=rate, n_mfcc=13, n_fft=512, n_mels=40, fmin=20, hop_length=4000)
+
+    mfcc_feature = preprocessing.scale(mfcc_feature, axis=1)
+
     mfcc_feature = stats.zscore(mfcc_feature)
 
-    delta_f = delta(mfcc_feature, 2)
-    d_delta_f = delta(delta_f, 2)
+    delta_f = delta(mfcc_feature)
+    d_delta_f = delta(mfcc_feature, order=2)
     combined = np.hstack((mfcc_feature,delta_f, d_delta_f)) 
     return combined
 
@@ -32,7 +38,7 @@ def build_model(train_X, train_y, test_X, test_y, verbose=0):
     features_y = []
     for index in range(len(data_X)):
         vector = extract_features(data_X[index][0], data_X[index][1])
-        
+        vector = np.transpose(vector)
         features.append(vector)
         features_y.append(np.array([data_y[index]] * len(vector)))
     features = np.vstack(features)
@@ -54,16 +60,21 @@ def evaluate(verbose = 0):
     	model = pickle.load(modelfile)
 
     results = ''
+    cntr = 0
     for file in glob.glob('data/eval/*.wav'):
         if verbose:
             print('Probing ' + file + '..\n')
-        voice = wavfile.read(file)
+        voice = load_audio(file)
         feats = extract_features(voice[0], voice[1])
+        feats = np.transpose(feats)
         prob = model.predict_proba(feats)
         mean = np.mean([x[1] for x in prob])
         if verbose:
             print('I\'m ' + str(mean)+' sure this record is the target.\n')
-        results += "{} {} {}\n".format(file, mean, int(mean >= 0.5))
+            cntr += 1
+        results += "{} {} {}\n".format(file, mean, int(mean >= 0.18))
 
+    if verbose:
+        print('I\'ve found '+str(cntr) + ' matches.\n')
     with open('voice_RandomForest.txt', 'w') as output:
 	    output.write(results)

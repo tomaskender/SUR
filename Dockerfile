@@ -9,6 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
+# soundfile dep
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential gcc libsndfile1-dev 
+
 # Install pip requirements
 ADD requirements.txt .
 RUN python -m pip install -r requirements.txt

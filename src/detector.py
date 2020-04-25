@@ -5,7 +5,8 @@ import face_detector as face
 import voice_detector as voice
 import argparse
 from datetime import datetime
-from scipy.io import wavfile
+#from scipy.io import wavfile
+from librosa.core import load as load_audio
 
 PARENT_DIR = os.getcwd()
 DATA_DIR = PARENT_DIR + "/data/"
@@ -37,7 +38,7 @@ def get_image_file(file):
 	return [np.array(Image.open(f).convert('RGB')) for f in glob.glob(file)]
 
 def get_audio_file(file):
-    return [wavfile.read(f) for f in glob.glob(file)]
+    return [load_audio(f) for f in glob.glob(file)]
 
 # loads images and concatenates train and test data
 def image_data():
