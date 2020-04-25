@@ -62,6 +62,10 @@ Okrem toho je potrebné mať nainštalované aj linuxové knižnice \textbf{\tex
    |-- eval              // dáta určené ku klasifikácií
    |-- src               // zdrojové kódy 
 -requirements.txt
+-images_CNN.txt	         // vyhodnotené dáta z eval modelom CNN
+-images_SGD.txt	         // vyhodnotené dáta z eval modelom SGD
+-voice_RandomForest.txt	 // vyhodnotené dáta z eval modelom RandomForest
+
 			\end{verbatim}
 			
 		\subsection{Spustenie jednotlivých súčastí detektoru}
@@ -117,8 +121,7 @@ Nevýhodou sú vlastnosti modelov z~knižnice \emph{scikit}, kde je obtiažne z�
 
 	Pre detekciu hlasovej nahrávky by mohlo byť zaujímavé porovnanie s~GMM modelom, ktoré sa javilo byť rýchlejšie na natrénovanie, avšak to sa mi nepodarilo spojazdniť a musel som ostať pri Random Foreste. Systém vracia pre zhodu skóre 0.14-17 a pre nezhodu zhruba 0.08-0.12 až 0.13. Toto by šlo určite vylepšiť chytrejším výpočtom celkového skóre z~výstupu predikcie modelu, ale pre naše potreby vracalo postačujúce výsledky aj existujúce riešenie, ktoré priemeruje čiastkové skóre.
 	Ďalším možným vylepšením by mohlo byť pridanie delty a double delty piptracku do evaluácie na úkor MFCC. Na otestovanie tohto scenára už ale čas neostal.
-	
-	\\
+\\
 	
 	Projekt nám dal praktický pohľad na teóriu preberanú na prednáškach a dal nám možnosť vyskúšať si metódy v~praxi. Mohli sme vidieť viac či menej funkčné modely a vybrali sme spomedzi nich tie, ktoré nám prišli najvhodnejšie pre naše dáta. V~budúcnosti by bolo možné zvyšiť kvalitu a presnosť detektorov vďaka lepšiemu nastaveniu parametrov, na ktoré je napríklad neurónová sieť veľmi citlivá a vedeli by sme sa vďaka nadobudnutým skúsenostiam lepšie zamerať na vhodnejšie modely.
 
