@@ -5,7 +5,6 @@ import face_detector as face
 import voice_detector as voice
 import argparse
 from datetime import datetime
-#from scipy.io import wavfile
 from librosa.core import load as load_audio
 
 PARENT_DIR = os.getcwd()
