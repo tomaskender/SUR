@@ -34,14 +34,14 @@
 	\end{titlepage}
 		
 	\section{Úvod}
-	Zadaním projektu je natrénovať detektor jednej osoby z~obrázku tváre či hlasovej nahrávky. Detektor je implementovaný v~programovacom jazyku \texttt{Python\,3.8}. 
+	Zadaním projektu je natrénovať detektor jednej osoby z~obrázku tváre či hlasovej nahrávky. Detektor je implementovaný v~programovacom jazyku \textbf{\texttt{Python\,3.8}}. 
 	
 	\section{Spustenie a používanie detektoru}
 		\subsection{Inštalácia knižníc}
-	Na spustenie všetkých súčastí programu je potrebné mať nainštalované všetky potrebné knižnice a súčasti, ktoré sú obsiahnuté v~súbore \texttt{requirements.txt}. 
-	Okrem toho je potrebné mať nainštalované aj linuxové knižnice \texttt{sox} a \texttt{libsndfile1-dev}.
+	Na spustenie všetkých súčastí programu je potrebné mať nainštalované všetky potrebné knižnice a súčasti, ktoré sú obsiahnuté v~súbore \texttt{requirements.txt}. \\ \\
+Okrem toho je potrebné mať nainštalované aj linuxové knižnice \textbf{\texttt{sox}} a \textbf{\texttt{libsndfile1-dev}}.\\
 
-	Inštalaciu pythonových knižníc je možné uskutočniť pomocou \texttt{pip}:
+	Inštaláciu pythonových knižníc je možné uskutočniť pomocou \texttt{pip}:
 			\begin{verbatim}
     $ pip install -r requirements.txt
 			\end{verbatim}
@@ -75,13 +75,15 @@
 			\end{verbatim}
 	Po spustení sa natrénujú modely trénovacími dátami, modely sa uložia do priečinku \texttt{src} a následne sa uskutoční klasifikácia dát v~\texttt{eval} a uložia sa výsledky do .txt súboru.
 	Funkcie detektoru je možné upravovať pomocou prepínačou na príkazovom riadku.
+			
 			\begin{verbatim}
+--system    // [povinný argument] výber systému, ktorý sa má spustiť 
+               (system=face | system=voice)	
 --verbose   // informácie pre ladenie
 --plot      // vykreslí informácie získané počas trénovania 
 --evalonly  // vyhodnotia sa len dáta v /eval (potrebné mať uložené modely)
 --trainonly // trénovanie modelu bez vyhodnotenia
 --cnn       // použitie CNN modelu pre spracovanie obrázkov
---system    // výber systému, ktorý sa má spustiť (face alebo voice)
 			\end{verbatim}
 			
 	\section{Spracovanie obrázkov}
@@ -106,7 +108,7 @@ Nevýhodou sú vlastnosti modelov z~knižnice \emph{scikit}, kde je obtiažne z�
 			
 			Z~toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
 			Ladením a testovaním som nakoniec skončil pri lese s~veľkosťou 96 stromov a zhodnou hĺbkou.
-\newpage
+
 \section{Záver}
 	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a prijateľnú presnosť sme sa rozhodli ho ponechať v~projekte. Z~hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
 \\
