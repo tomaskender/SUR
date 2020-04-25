@@ -32,7 +32,7 @@
 			\end{tabular}
 		}
 	\end{titlepage}
-	
+		
 	\section{Úvod}
 	Zadaním projektu je natrénovať detektor jednej osoby z~obrázku tváre či hlasovej nahrávky. Detektor je implementovaný v~programovacom jazyku \texttt{Python\,3.8}. 
 	
@@ -54,7 +54,7 @@
 		\subsection{Dátová štruktúra}
 	Program očakáva nasledujúcu dátovú štruktúru.
 			\begin{verbatim}
--- |-- data              // dáta určené k~trénovaniu a testovaniu detektoru
+-- |-- data              // dáta určené k trénovaniu a testovaniu detektoru
        |-- target_dev
        |-- non_target_dev
        |-- target_train
@@ -78,31 +78,43 @@
 			\begin{verbatim}
 --verbose   // informácie pre ladenie
 --plot      // vykreslí informácie získané počas trénovania 
---evalonly  // vyhodnotia sa len dáta v~/eval (potrebné mať uložené modely)
+--evalonly  // vyhodnotia sa len dáta v /eval (potrebné mať uložené modely)
 --trainonly // trénovanie modelu bez vyhodnotenia
 --cnn       // použitie CNN modelu pre spracovanie obrázkov
 --system    // výber systému, ktorý sa má spustiť (face alebo voice)
 			\end{verbatim}
-	\section{Použité modely}
-		\subsection{Modely pre spracovanie obrázkov}
-		Pred samotným trénovaním modelov je dôležité získať čo najviac trénovacích a testovacích dát. Toto je docielené tým, že na trénovanie sa používajú všetky \emph{.png} súbory v~priečinku \texttt{data}. Obrázky sa načítajú pomocou knižnice \emph{Pillow}. Target dátam sa nastaví label 1, ostatným label 0. Pomocou \emph{ImageDataGenerator} z~knižnice \emph{Keras} sa vytvoria ďalšie trénovacie dáta a to vďaka modifikácií ako posun, rotacia, skrivenie, prevrátenie. Takto získané dáta smerujú modelom na trénovanie. 
-\subsubsection{Model CNN}
-\textbf{CNN} je model konvolučných neuronových sietí, bol vybraný na základe zvedavosti, či CNN dokáže na akceptovateľnej úrovni rozpoznať tváre. Tento model získava features obrázkov z~rôznych vrstiev, známe aj ako \emph{feature maps}, pomocou \emph{pooling-u} postupne matice \uv{zmenšujeme}, respektíve podvzorkujeme. Nakoniec použijeme funkciu \emph{flatten} čím vytvoríme 1D pole. Ako optimalizátor je použitý \textbf{SGD} - \emph{Stochastic-Gradient Descent}, a aby sme zabránili pretrénovaniu, dáta sa predkladajú v~náhodnom poradí a zo všetkých dát sa náhodne vybere 20\%, ktoré sa budú používať ako testovacie dáta. Trénovanie modelu potom prebieha v~desiatkách \emph{Epochs} a samotné trénovanie trvá pomerne dlho. Model sa po trénovaní uloží \texttt{src/modelCNN.h5}.
-\subsubsection{Lineárny model SVM s~SGD}
-Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a celková rýchlosť v porovnaní s ostatnými klasifikátormi a pritom so stále použiteľnou úspešnosťou.
+			
+	\section{Spracovanie obrázkov}
+		Pred samotným trénovaním modelov je dôležité získať, čo najviac trénovacích a testovacích dát. Toto je docielené tým, že na trénovanie sa používajú všetky \emph{.png} súbory v~priečinku \texttt{data}. Obrázky sa načítajú pomocou knižnice \emph{Pillow}. Target dátam sa nastaví label 1, ostatným label 0. Pomocou \emph{ImageDataGenerator} z~knižnice \emph{Keras} sa vytvoria ďalšie trénovacie dáta a to vďaka modifikácií ako posun, rotacia, skrivenie, prevrátenie. Takto získané dáta smerujú modelom na trénovanie. 
+		
+\subsection{Model CNN}
+\textbf{CNN} je model konvolučných neuronových sietí, bol vybraný na základe zvedavosti, či CNN dokáže na akceptovateľnej úrovni rozpoznať tváre. 
+
+Tento model získava features obrázkov z~rôznych vrstiev, známe aj ako \emph{feature maps}, pomocou \emph{pooling-u} postupne matice \uv{zmenšujeme}, respektíve podvzorkujeme. Nakoniec použijeme funkciu \emph{flatten} čím vytvoríme 1D pole. Ako optimalizátor je použitý \textbf{SGD} - \emph{Stochastic-Gradient Descent}, a aby sme zabránili pretrénovaniu, dáta sa predkladajú v~náhodnom poradí a zo všetkých dát sa náhodne vybere 20\%, ktoré sa budú používať ako testovacie dáta. 
+
+Trénovanie modelu potom prebieha v~desiatkách \emph{Epochs} a samotné trénovanie trvá pomerne dlho. Model sa po trénovaní uloží \texttt{src/modelCNN.h5}.
+
+\subsection{Lineárny model SVM s~SGD}
+Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a celková rýchlosť v~porovnaní s~ostatnými klasifikátormi a pritom so stále použiteľnou úspešnosťou. 
+
+Nevýhodou sú vlastnosti modelov z~knižnice \emph{scikit}, kde je obtiažne získať soft score pre vyhodnotenie jedného obrázku, pri viacerých modeloch (\emph{KNeighborsClassifier, GaussianProcessClassifier, GaussianProcessClassifier s~modifikáciou RBF, RandomForestrClassifier}) sme dokázali vždy získať len celkovú presnosť modelu. Zo všetkých uvedených modelov bol SGD najrýchlejší, aj preto bol ponechaný v~implementácií. Po natrénovaní sa model uloži do \texttt{src/modelSGD.pkl}
 	\section{Spracovanie zvuku}
-			\subsection{Random Forest s MFCC}
-			Z nahrávky sa najprv odstráni šum, následne sa oddelí ticho. Pre extrahovanie features bola zvolená knižnica \emph{librosa}. Z nej boli využité MFCC a piptrack (čiže pitch hlasu) pre charakterizáciu nahrávky. MFCC featúry sa následne ešte ďalej škálovali a prehnali funkciou zscore z knižnice \emph{scipy}.
+			\subsection{Random Forest s~MFCC}
+			Z~nahrávky sa najprv odstráni šum, následne sa oddelí ticho. Pre extrahovanie features bola zvolená knižnica \emph{librosa}. Z~nej boli využité MFCC a piptrack (čiže pitch hlasu) pre charakterizáciu nahrávky. MFCC featúry sa následne ešte ďalej škálovali a prehnali funkciou zscore z~knižnice \emph{scipy}.
 			
-			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k zlému výsledku, prevažná väčšina dojde k správnemu a túto chybu kvantitatívne vyváži.
+			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k~zlému výsledku, prevažná väčšina dojde k~správnemu a túto chybu kvantitatívne vyváži.
 			
-			Z toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
-			Ladením a testovaním som nakoniec skončil pri lese s veľkosťou 96 stromov a zhodnou hĺbkou.
-
+			Z~toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
+			Ladením a testovaním som nakoniec skončil pri lese s~veľkosťou 96 stromov a zhodnou hĺbkou.
+\newpage
 \section{Záver}
-	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a    prijateľnú presnosť sme sa rozhodli ho ponechať v projekte. Z hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
+	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a prijateľnú presnosť sme sa rozhodli ho ponechať v~projekte. Z~hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
+\\
 
-	Pre detekciu hlasovej nahrávky by mohlo byť zaujímavé porovnanie s GMM modelom, ktoré sa javilo byť rýchlejšie na natrénovanie, avšak to sa mi nepodarilo spojazdniť a musel som ostať pri Random Foreste. Systém vracia pre zhodu skóre 0.14-17 a pre nezhodu zhruba 0.08-0.12 až 0.13. Toto by šlo určite vylepšiť chytrejším výpočtom celkového skóre z výstupu predikcie modelu, ale pre naše potreby vracalo postačujúce výsledky aj existujúce riešenie, ktoré priemeruje čiastkové skóre.
+	Pre detekciu hlasovej nahrávky by mohlo byť zaujímavé porovnanie s~GMM modelom, ktoré sa javilo byť rýchlejšie na natrénovanie, avšak to sa mi nepodarilo spojazdniť a musel som ostať pri Random Foreste. Systém vracia pre zhodu skóre 0.14-17 a pre nezhodu zhruba 0.08-0.12 až 0.13. Toto by šlo určite vylepšiť chytrejším výpočtom celkového skóre z~výstupu predikcie modelu, ale pre naše potreby vracalo postačujúce výsledky aj existujúce riešenie, ktoré priemeruje čiastkové skóre.
+	\\
+	
+	Projekt nám dal praktický pohľad na teóriu preberanú na prednáškach a dal nám možnosť vyskúšať si metódy v~praxi. Mohli sme vidieť viac či menej funkčné modely a vybrali sme spomedzi nich tie, ktoré nám prišli najvhodnejšie pre naše dáta. V~budúcnosti by bolo možné zvyšiť kvalitu a presnosť detektorov vďaka lepšiemu nastaveniu parametrov, na ktoré je napríklad neurónová sieť veľmi citlivá a vedeli by sme sa vďaka nadobudnutým skúsenostiam lepšie zamerať na vhodnejšie modely.
 
 
 \end{document}
