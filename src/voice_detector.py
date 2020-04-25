@@ -91,7 +91,7 @@ def evaluate(verbose = 0):
             cntr += 1
         if verbose:
             print('I\'m ' + str(mean)+' sure this record is the target.\n')
-        results += "{} {} {}\n".format(file, mean, int(mean > 0.14))
+        results += "{} {:.4f} {}\n".format(file, mean, int(mean > 0.14))
 
     if verbose:
         print('I\'ve found '+ str(cntr) + ' matches.\n')
