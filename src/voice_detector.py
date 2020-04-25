@@ -78,9 +78,10 @@ def evaluate(verbose = 0):
     # count matches
     cntr = 0
     for file in glob.glob('eval/*.wav'):
+        voice = load_audio(file)
+        file = file.split('/', 1)[1] # remove eval/ from filename
         if verbose:
             print('Probing ' + file + '..\n')
-        voice = load_audio(file)
         feats = extract_features(voice[0], voice[1])
         prob = model.predict_proba(feats)
         # get mean value of score for each frame
