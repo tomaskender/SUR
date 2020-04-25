@@ -39,8 +39,9 @@
 	\section{Spustenie a používanie detektoru}
 		\subsection{Inštalácia knižníc}
 	Na spustenie všetkých súčastí programu je potrebné mať nainštalované všetky potrebné knižnice a súčasti, ktoré sú obsiahnuté v~súbore \texttt{requirements.txt}. 
-	
-	Ich inštalaciu je možné uskutočniť pomocou \texttt{pip}:
+	Okrem toho je potrebné mať nainštalované aj linuxové knižnice \texttt{sox} a \texttt{libsndfile1-dev}.
+
+	Inštalaciu pythonových knižníc je možné uskutočniť pomocou \texttt{pip}:
 			\begin{verbatim}
     $ pip install -r requirements.txt
 			\end{verbatim}
@@ -49,7 +50,7 @@
 			\begin{verbatim}
     $ pip3 install -r requirements.txt
 			\end{verbatim}
-			\emph{Poznámka: Program sa dá spustiť aj priamo cez priložený dockerfile, ktorý nainštaluje balíky do virtuálneho prostredia a tým nerozhodí našu existujúcu konfiguráciu na počítači.}
+			\emph{Poznámka: Program sa dá spustiť aj priamo cez priložený dockerfile, ktorý nainštaluje linuxoé i pythonové balíky do virtuálneho prostredia a tým nerozhodí našu existujúcu konfiguráciu na počítači.}
 		\subsection{Dátová štruktúra}
 	Program očakáva nasledujúcu dátovú štruktúru.
 			\begin{verbatim}
@@ -91,8 +92,9 @@
 Ako druhý model bol zvolený \textbf{SGDclassifier} použitý z~knižnice \emph{sklearn.linear\_model}. Používa lineárny klasifikátor \textbf{SVM} - \emph{Support Vector Machines} s~trénovaním dát SGD. Model bol vybraný hlavne ako o~dosť rýchlejšia alternatíva k~CNN modelu vzhľadom na trénovanie modelu a celková rýchlosť v porovnaní s ostatnými klasifikátormi a pritom so stále použiteľnou úspešnosťou.
 	\section{Spracovanie zvuku}
 			\subsection{Random Forest s MFCC}
-			Pre extrahovanie features bol zvolený \textbf{MFCC} z knižnice \emph{python\_speech\_features}. Ten bol pre vyššiu presnosť kombinovaný s deltou vzoriek a deltou delty (tzv. double delta).
+			Z nahrávky sa najprv odstráni šum, následne sa oddelí ticho. Pre extrahovanie features bola zvolená knižnica \emph{librosa}. Z nej boli využité MFCC a piptrack (čiže pitch hlasu) pre charakterizáciu nahrávky. MFCC featúry sa následne ešte ďalej škálovali a prehnali funkciou zscore z knižnice \emph{scipy}.
 			Čo sa týka použitého klasifikátora, tu padla voľba na \textbf{Random Forrest Classifier} zo \emph{sklearn.ensemble}. Jeho hlavnou črtou je delegovanie úloh na jednotlivé rozhodovacie stromy. Každý rozhodovací strom spraví predikciu a najrozšírenejší výsledok sa zobere ako výsledok. Základným predpokladom ale je to, že jednotlivé stromy sú navzájom od seba nezávislé (čiže používajú pri vyhodnocovaní rôzne vlastnosti), a teda aj keď niektoré stromy dojdú k zlému výsledku, prevažná väčšina dojde k správnemu a túto chybu kvantitatívne vyváži. Z toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
+			Ladením a testovaním som nakoniec skončil pri lese s veľkosťou 96 stromov a zhodnou hĺbkou.
 
 \section{Záver}
 	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a    prijateľnú presnosť sme sa rozhodli ho ponechať v projekte. Z hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
