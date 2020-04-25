@@ -109,11 +109,15 @@ Nevýhodou sú vlastnosti modelov z~knižnice \emph{scikit}, kde je obtiažne z�
 			Z~toho dôvodu platí, ze čím vyšší máme počet stromov, tým vyššiu šancu máme na to, že prečíslime chybujúce stromy. Zároveň to ale pochopiteľne zvyšuje zaťaženie procesora. Druhou najvýznamnejšou konfigurovateľnou premennou je maximálna hĺbka stromu.
 			Ladením a testovaním som nakoniec skončil pri lese s~veľkosťou 96 stromov a zhodnou hĺbkou.
 
+			Pôvodne sa featúry skladali len z MFCC, delty a double delty. Tie mi však spoľahlivo nedokázali rozlišovať osoby a výsledky boli pomerne náhodné. Presnosť sa dosiahla až zmenou evaluovaných dát na MFCC+pitch hlasu. Práve pitch sa ukázal byť ako kľúčový faktor.
+
 \section{Záver}
 	Pre detekciu tváre sa používajú celkovo dva modely. Presnosť CNN modelu je vyššia, čo je pravdepodobne spôsobené aj dlhším trénovaním dát. Presnosť by sa dala zvyšiť zmenou určitých nastavení ako napríklad pridanie ďalšieho filtru alebo použitím vhodnejšieho optimalizátoru. Pri SGD modele je najväčším problémom nemožnosť nastaviť získanie score pre vyhodnotený obrázok, avšak pre jeho rýchlosť a prijateľnú presnosť sme sa rozhodli ho ponechať v~projekte. Z~hladiska zvýšenia presnosti by bolo najvhodnejšie tento model vynechať, nakoľko lineárny klasifikátor nemusí byť najvhodnejšia voľba pre naše dáta. 
 \\
 
 	Pre detekciu hlasovej nahrávky by mohlo byť zaujímavé porovnanie s~GMM modelom, ktoré sa javilo byť rýchlejšie na natrénovanie, avšak to sa mi nepodarilo spojazdniť a musel som ostať pri Random Foreste. Systém vracia pre zhodu skóre 0.14-17 a pre nezhodu zhruba 0.08-0.12 až 0.13. Toto by šlo určite vylepšiť chytrejším výpočtom celkového skóre z~výstupu predikcie modelu, ale pre naše potreby vracalo postačujúce výsledky aj existujúce riešenie, ktoré priemeruje čiastkové skóre.
+	Ďalším možným vylepšením by mohlo byť pridanie delty a double delty piptracku do evaluácie na úkor MFCC. Na otestovanie tohto scenára už ale čas neostal.
+	
 	\\
 	
 	Projekt nám dal praktický pohľad na teóriu preberanú na prednáškach a dal nám možnosť vyskúšať si metódy v~praxi. Mohli sme vidieť viac či menej funkčné modely a vybrali sme spomedzi nich tie, ktoré nám prišli najvhodnejšie pre naše dáta. V~budúcnosti by bolo možné zvyšiť kvalitu a presnosť detektorov vďaka lepšiemu nastaveniu parametrov, na ktoré je napríklad neurónová sieť veľmi citlivá a vedeli by sme sa vďaka nadobudnutým skúsenostiam lepšie zamerať na vhodnejšie modely.
